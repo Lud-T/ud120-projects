@@ -43,6 +43,34 @@ print "Person of interest number"
 count = 0
 for user in enron_data:
     if enron_data[user]['poi'] == True:
-        count+=1
+        count += 1
 print count
 
+
+
+#Quizz How many POI with 
+#../final_project/poi_names.txt
+#../final_project/poi_email_addresses.py
+
+print "Person of interest number with poi_names"
+
+#https://python.sdv.univ-paris-diderot.fr/07_fichiers/
+count = 0
+#count if there is a y or n <= if the line is about a person or nothing or the label
+with open("../final_project/poi_names.txt", "r") as filin:
+    for ligne in filin:
+        if ligne[1:2] == "y" :
+            count += 1
+        if ligne[1:2] == "n" :
+            count += 1
+print count
+
+print 'James prentice total stock value'
+print enron_data["PRENTICE JAMES"]['total_stock_value']
+
+print 'How many email messages do we have from Wesley Colwell to persons of interest?'
+print enron_data["COLWELL WESLEY"]['from_this_person_to_poi']
+
+
+print 'What s the value of stock options exercised by Jeffrey K Skilling?'
+print enron_data["SKILLING JEFFREY K"]['exercised_stock_options']
