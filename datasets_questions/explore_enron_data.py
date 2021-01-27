@@ -16,7 +16,19 @@
 """
 
 import pickle
+import pprint
 
-enron_data = pickle.load(open("../final_project/final_project_dataset.pkl", "rb"))
+pp = pprint.PrettyPrinter(depth=4)
 
+#ValueError: insecure string pickle
+#https://github.com/udacity/ud120-projects/issues/232
+enron_data = pickle.load(open("../final_project/final_project_dataset.pkl", "r"))
+print "Loaded"
 
+print "Dict length aka number of people : ",len(enron_data)
+
+print "Dict length of the first dict aka number of features : ",len(enron_data.values()[0])
+
+print "Features of a person"
+
+pp.pprint(enron_data.values()[0])
