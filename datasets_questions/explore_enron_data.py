@@ -25,10 +25,24 @@ pp = pprint.PrettyPrinter(depth=4)
 enron_data = pickle.load(open("../final_project/final_project_dataset.pkl", "r"))
 print "Loaded"
 
+#check people number
 print "Dict length aka number of people : ",len(enron_data)
 
+#check feature number
 print "Dict length of the first dict aka number of features : ",len(enron_data.values()[0])
 
+#Check features names 
 print "Features of a person"
-
 pp.pprint(enron_data.values()[0])
+
+#Check people of interest
+#Last results 'poi' True or False
+
+print "Person of interest number"
+
+count = 0
+for user in enron_data:
+    if enron_data[user]['poi'] == True:
+        count+=1
+print count
+
