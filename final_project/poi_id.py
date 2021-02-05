@@ -16,9 +16,6 @@ import pandas as pd
 import numpy as np
 import pprint
 
-from sklearn.feature_selection import SelectKBest, f_classif
-
-
 pp = pprint.PrettyPrinter(depth=4)
 
 '''First launch
@@ -594,7 +591,8 @@ labels, features = targetFeatureSplit(data_array)
 ###SelectKbest
 ###output nicely
 ###https://stackoverflow.com/questions/41897020/sklearn-selectkbest-how-to-create-a-dict-of-feature1score-feature2score
-selector = SelectKBest(f_classif, k = 10)
+from sklearn.feature_selection import SelectKBest, f_classif
+selector = SelectKBest(f_classif, k ='all')
 selector.fit(features, labels)
 #pp.pprint(zip(features_list, selector.scores_))
 combined = zip(features_list, selector.scores_)
@@ -604,25 +602,43 @@ kbest_df = pd.DataFrame(combined)
 
 pp.pprint(kbest_df)
 ###
-###SelectKbest gives somes results
+###SelectKbest results 
+###
+#                            0          1
+# 0                  total_mail  25.097542
+# 1                       bonus  24.464726
+# 2               director_fees  21.060002
+# 3            restricted_stock  18.575703
+# 4     from_poi_to_this_person  16.641707
+# 5                    expenses  11.595548
+# 6             deferred_income  10.072455
+# 7     from_this_person_to_poi   8.961784
+# 8                      salary   8.866722
+# 9   restricted_stock_deferred   8.746486
+# 10    shared_receipt_with_poi   7.242730
+# 11          deferral_payments   6.234201
+# 12             ratio_from_poi   5.518506
+# 13          total_stock_value   5.344942
+# 14    exercised_stock_options   4.955198
+# 15              from_messages   4.204971
+# 16             total_mail_poi   3.210762
+# 17               ratio_to_poi   2.426508
+# 18                      other   2.107656
+# 19                        poi   1.698824
+# 20             total_payments   0.515192
+# 21        long_term_incentive   0.245090
+# 22                to_messages   0.225355
+# 23              loan_advances   0.164164
+
+
+###
+###My final list of features will be :
 ###
 
+features_list = ['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
 
+pp.pprint(features_list)
 
-###Let's try another one.
-
-###SelectPercentile
-###output nicely
-###https://stackoverflow.com/questions/41897020/sklearn-selectkbest-how-to-create-a-dict-of-feature1score-feature2score
-selector = SelectKBest(f_classif, k = 10)
-selector.fit(features, labels)
-#pp.pprint(zip(features_list, selector.scores_))
-combined = zip(features_list, selector.scores_)
-combined.sort(reverse=True, key= lambda x: x[1])
-
-kbest_df = pd.DataFrame(combined)
-
-pp.pprint(kbest_df)
 
 
 
@@ -633,10 +649,6 @@ pp.pprint(kbest_df)
 ### Task 3: Create new feature(s)
 ### Store to my_dataset for easy export below.
 my_dataset = data_dict
-
-
-
-
 
 ### Extract features and labels from dataset for local testing
 data = featureFormat(my_dataset, features_list, sort_keys = True)
@@ -651,6 +663,22 @@ labels, features = targetFeatureSplit(data)
 # Provided to give you a starting point. Try a variety of classifiers.
 from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
+
+
+
+# run_clf(clf, features_train, features_test, labels_train, labels_test):
+# ''' takes a classifier and training and test data
+# prints performance time and metrics'''
+# t0 = time()
+# clf.fit(features_train, labels_train)
+# print "training time:", round(time()-t0, 3), "s"
+# t0 = time()
+# labels_prediction = clf.predict(features_test)
+# print "prediction time:", round(time()-t0, 3), "s"
+# report = classification_report(labels_test, labels_prediction)
+# print report
+
+
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
