@@ -10,6 +10,7 @@ from tester import dump_classifier_and_data
 
 
 ###My import
+from tester import test_classifier
 import matplotlib.pyplot as plt
 import seaborn as sns
 import pandas as pd
@@ -62,17 +63,18 @@ easier to me to manipulate the data in it.
 It seems there are a lot of code I should have converted to function because now they are working.
 When there were not working my goal was to makes them work.
 '''
-
-
 print "  "
 print " ------------------"
 print "| Data Exploration |"
 print " ------------------"
 print "  "
+### people number
 print "People number : ", len(data_dict)
 print "  "
+### feature number
 print "features : ", len(data_dict.values()[0])
 print "  "
+### feature name
 print "features names: "
 ### Take the first name I get with 
 pp.pprint(data_dict['METTS MARK'].keys())
@@ -107,8 +109,13 @@ for employee in data_dict:
                 data_dict[employee][key] = np.nan
                 #print type(data_dict[employee][key])
                 keysNaN[key]+=1
-print "NaN number for each feature:"          
-pp.pprint(keysNaN)
+#print "NaN number for each feature:"          
+#pp.pprint(keysNaN)
+print "---------------"
+print "NaN conversion : done "
+print "---------------"
+
+
 
 ###Zero check
 print "---------------"
@@ -120,12 +127,18 @@ for employee in data_dict:
         for key in data_dict[employee]:
             if data_dict[employee][key] == 0:
                 keysZero[key]+=1
-print "Zero number for each feature:"          
+print "Zero number for each feature:"  
 for line in keysZero:
     if keysZero[line] >> 0:
         print line, " : ", keysZero[line]
+print "---------------"
+print "Zero check : done "
+print "---------------"
 
 
+#########################################
+###Data exploration END               ###
+#########################################
 
 '''
 I check if the NaN count and the zero count can interfere If I replace the NaN by zero !!!
@@ -194,23 +207,149 @@ for column in data_df.columns:
 
 '''
 
-
-
+###Display boxplot and highest value and related name                ###
+print "-------------------"
+print "Check for the max value : "
+print "-------------------"
 ###More relevant code
 ###Very personnal approach to detect outliers
+print "-------------------"
+print "Display boxplot with the person having the max value for each variable : "
+print "Then, I check in the PDF if it is a mistake or not"
+print "We have not many data so I'll try to keep as much data as it makes sense"
+print "Also, if we found an outlier presumption from a POI person, it should mean it is not an real outlier"
+print "but a real kind of POI detection"
+print "-------------------"
 outlierMax = []
 for column in data_df.columns:
     if (column != 'email_address'):
         if (column != 'poi'):
-            sns.boxplot(data=data_df[column], orient="h")
+            #sns.boxplot(data=data_df[column], orient="h")
             search = data_df[column] == data_df[column].max()
-            plt.title(column + "  Max : " + str(data_df[column].max()) + "\nID : " + str(data_df[search].index.values) + "  POI : " + str(data_df.loc[data_df[search].index.values, 'poi'].values))
-            #print column,"\t", data_df[search].index.values,"\t", data_df[column].max(),"\t",data_df.loc[data_df[search].index.values, 'poi'].values
+            #plt.title(column + "  Max : " + str(data_df[column].max()) + "\nID : " + str(data_df[search].index.values) + "  POI : " + str(data_df.loc[data_df[search].index.values, 'poi'].values))
+            ###print column,"\t", data_df[search].index.values,"\t", data_df[column].max(),"\t",data_df.loc[data_df[search].index.values, 'poi'].values
             outlierMax.append([column,str(data_df[search].index.values), float(data_df[column].max()),str(data_df.loc[data_df[search].index.values, 'poi'].values)])
             #plt.show()  
 
 outlierMax_df = pd.DataFrame(outlierMax,columns =['Variable','Name','Value Max','POI'])
 pp.pprint(outlierMax_df)
+
+print "   "
+print "As we can see, 'TOTAL' is clearly an outlier."
+print "It is the sum of column values"
+print "   "
+print "Higher value are more relevant in this case than lower value, I will not check for them"
+print "   "
+print "Checking the PDF provided, I saw the line 'THE TRAVEL AGENCY IN THE PARK' just above"
+print "As there is almost no data, this is not a real people and it is not a POI, I decided to drop it either"
+print "   "
+print "Negative value : "
+print "Negative are bothering with my approach, let's convert them to absolute."
+print "   "
+
+
+###Negative number management ###
+print ""
+print "---------------"
+print "Negatives values check: "
+print "---------------"
+print ""
+### create a dict with all the features to count the NaN
+keysNeg = dict((key, 0) for key, value in data_dict['METTS MARK'].iteritems())
+for employee in data_dict:
+        for key in data_dict[employee]:
+            if data_dict[employee][key] < 0:
+                #print employee
+                keysNeg[key]+=1
+print "Negative number for each feature:"          
+for line in keysNeg:
+    if keysNeg[line] >> 0:
+        print line, " : ", keysNeg[line]
+
+###In the PDF there is no negative value
+###I'll convert to positive one
+for employee in data_dict:
+        for key in data_dict[employee]:
+            if data_dict[employee][key] < 0:
+                data_dict[employee][key] = abs(data_dict[employee][key])  
+
+print ""
+print "---------------"
+print "Negatives values check after absolute value conversion: "
+print "---------------"
+print ""
+### create a dict with all the features to count the NaN
+keysNeg = dict((key, 0) for key, value in data_dict['METTS MARK'].iteritems())
+for employee in data_dict:
+        for key in data_dict[employee]:
+            if data_dict[employee][key] < 0:
+                #print employee
+                keysNeg[key]+=1
+print "Negative number for each feature:"          
+for line in keysNeg:
+    if keysNeg[line] >> 0:
+        print line, " : ", keysNeg[line]
+
+data_df = pd.DataFrame.from_dict(data_dict, orient='index')
+
+print ""
+print "------------------------------------------------------"
+print "Negatives values management DONE "
+print "------------------------------------------------------"
+print ""
+
+print "-----------"
+print "Drop outliers : "
+print "-----------"
+
+data_df = data_df.drop(['TOTAL'])
+data_dict.pop('TOTAL', 0)
+print "Drop 'TOTAL' : done"
+
+data_df = data_df.drop(['THE TRAVEL AGENCY IN THE PARK'])
+data_dict.pop('THE TRAVEL AGENCY IN THE PARK', 0)
+print "Drop 'THE TRAVEL AGENCY IN THE PARK' : done"
+
+print "-------------------"
+print "Check for the max value after drops : "
+print "-------------------"
+
+outlierMax = []
+for column in data_df.columns:
+    if (column != 'email_address'):
+        if (column != 'poi'):
+            #sns.boxplot(data=data_df[column], orient="h")
+            search = data_df[column] == data_df[column].max()
+            #plt.title(column + "  Max : " + str(data_df[column].max()) + "\nID : " + str(data_df[search].index.values) + "  POI : " + str(data_df.loc[data_df[search].index.values, 'poi'].values))
+            outlierMax.append([column,str(data_df[search].index.values), float(data_df[column].max()),str(data_df.loc[data_df[search].index.values, 'poi'].values)])
+            #plt.show()  
+
+outlierMax_df = pd.DataFrame(outlierMax,columns =['Variable','Name','Value Max','POI'])
+pp.pprint(outlierMax_df)
+
+
+
+print "   "
+print "I check everyone in the PDF"
+print "As the max values are correctly reported"
+print "I consider the ones below are not outliers"
+print "   "
+print "   "
+
+##########################################################
+### Testing purpose ONLY                               ###
+##########################################################
+###Visualize a boxplot for each column except email adress which is not a number to plot
+'''
+for column in data_df.columns:
+    if (column != 'email_address'):
+        sns.boxplot(data=data_df[column], orient="h")
+        plt.title("Boxplot : "+column)
+        plt.show()  
+'''
+# sns.boxplot(data=data_df['salary'], orient="h")
+# plt.title("Boxplot : "+"Salary"+" - Total")
+# plt.show()
 
 ###IQR testing on two variables
 ###I did not feel this approach fine with this small dataset.
@@ -257,9 +396,6 @@ print ""
 print "---------------"
 '''
 
-
-
-
 ###enron exercise
 ###Before removing outliers
 '''
@@ -278,7 +414,6 @@ plt.legend(loc='lower right')
 plt.title("Bonus vs Salary")
 plt.show()
 '''
-
 
 '''not relevant
 print ""
@@ -349,10 +484,8 @@ for employee in data_dict:
 print "---------------"
 '''
 
-
 ###I'll identify the highest
-
-
+'''
 print "  "
 print " ------------------"
 print "| Salary top 3  |"
@@ -366,40 +499,18 @@ print "| Salary bottom 3  |"
 print " ------------------"
 print "  "
 print data_df.sort_values(by=['salary'],ascending=True).head(3)
+'''
 
-
+'''
 search = data_df["salary"] == data_df["salary"].max()
 print data_df[search].index.values
+'''
 
 ###destroy the line TOTAL I found then check again for outliers
 #data_dict.pop(data_df[search].index.values[0])
 ###check if it worked
 #print "People number : ", len(data_dict)
-
-data_df = data_df.drop(data_df[search].index)
-data_dict.pop('TOTAL', 0)
-
-
-###Visualize a boxplot for each column except email adress which is not a number to plot
-'''
-for column in data_df.columns:
-    if (column != 'email_address'):
-        sns.boxplot(data=data_df[column], orient="h")
-        plt.title("Boxplot : "+column)
-        plt.show()  
-'''
-# sns.boxplot(data=data_df['salary'], orient="h")
-# plt.title("Boxplot : "+"Salary"+" - Total")
-# plt.show()
-
-
-
-
-
-
-
-
-
+#data_df = data_df.drop(data_df[search].index)
 
 ###enron exercise
 ###After removing outliers
@@ -426,7 +537,6 @@ plt.show()
 sns.boxplot(data_df["salary"])
 plt.show()
 '''
-
 
 '''not relevant in the end, just testing
 print ""
@@ -459,12 +569,19 @@ print ""
 pp.pprint(data_df.sort_values(by='salary', ascending=True, na_position='last').head(10))
 '''
 
+##########################################################
+### Testing purpose only END                           ###
+##########################################################
+
+
+
+
 print ""
 print "---------------"
 print "compare with PDF: "
 print "---------------"
 print ""
-###New chapter
+
 
 print "'deferred_income' data has been converted in negative value"
 print "Whereas boxplot may notify about outliers, it seems it is mostly dispersion of the data"
@@ -476,66 +593,49 @@ print ""
 
 
 
-print ""
-print "---------------"
-print "Negatives values check: "
-print "---------------"
-print ""
-###New chapter
-### create a dict with all the features to count the NaN
-keysNeg = dict((key, 0) for key, value in data_dict['METTS MARK'].iteritems())
-for employee in data_dict:
-        for key in data_dict[employee]:
-            if data_dict[employee][key] < 0:
-                #print employee
-                keysNeg[key]+=1
-print "Negative number for each feature:"          
-pp.pprint(keysNeg)
 
-###In the PDF there is no negative value
-###I'll convert to positive one
-
-
-for employee in data_dict:
-        for key in data_dict[employee]:
-            if data_dict[employee][key] < 0:
-                data_dict[employee][key] = abs(data_dict[employee][key])  
-
-
-print ""
-print "---------------"
-print "Negatives values check after absolute value conversion: "
-print "---------------"
-print ""
-###New chapter
-### create a dict with all the features to count the NaN
-keysNeg = dict((key, 0) for key, value in data_dict['METTS MARK'].iteritems())
-for employee in data_dict:
-        for key in data_dict[employee]:
-            if data_dict[employee][key] < 0:
-                #print employee
-                keysNeg[key]+=1
-print "Negative number for each feature:"          
-pp.pprint(keysNeg)
 
 #####################################################################################################
 
 ###Features selection
 
 
-###new feature 1
-###ratio mails to and from POI
+print ""
+print "------------------"
+print "Features selection : "
+print "------------------"
+print ""
+
+
+print ""
+print "At first glance, the first features I'll like to add :"
+print "Ratio of mail from and to POI per person"
+print "And the ratio POI related from the total mail"
+print "I imagine it is the preferred channel of communiation between people"
+print "So I try to get a max of data of this interaction"
+print ""
+
+
+
+###new features
+
 for line in data_dict:
+    #Ratio sent mail total and sent mail to POI
     data_dict[line]['ratio_to_poi'] = float(data_dict[line]['from_this_person_to_poi']) / float(data_dict[line]['from_messages'])
+    #Ratio received mail total and received mail to POI
     data_dict[line]['ratio_from_poi'] = float(data_dict[line]['from_poi_to_this_person']) / float(data_dict[line]['to_messages'])
 
-###new feature 1
-###ratio mails to and from POI
 for line in data_dict:
+    #Total mail : sent + received
     data_dict[line]['total_mail'] = data_dict[line]['from_messages'] + data_dict[line]['to_messages']
+    #total mail related to POI
     data_dict[line]['total_mail_poi'] = data_dict[line]['from_poi_to_this_person'] + data_dict[line]['from_this_person_to_poi']
+    #Ratio total mail and total mail related to POI
     data_dict[line]['total_ratio_mail_poi'] = float(data_dict[line]['total_mail_poi']) / float(data_dict[line]['total_mail'])
-    
+
+
+###Others features calculation do not seem to be as relevant as thes ones.
+
 '''
 features_list = ['poi','total_mail','total_mail_poi']
 dataToDisplay = featureFormat(data_dict, features_list, sort_keys = True)
@@ -652,6 +752,8 @@ plt.show()
 ### Let's put 0 instead of NaN and check it again, intuitively, I cannot understand there is no correlation in this test.
 '''
 
+
+###Finally I need to convert NaN to zero to explore relationship between features
 ###NaN to zero
 print "Value/Nan check : "
 print "---------------"
@@ -706,7 +808,30 @@ plt.show()
 
 features_list = ['poi','to_messages','deferral_payments','expenses','deferred_income','long_term_incentive','restricted_stock_deferred','shared_receipt_with_poi','loan_advances','from_messages','other','director_fees','bonus','total_stock_value','from_poi_to_this_person','ratio_to_poi','from_this_person_to_poi','restricted_stock','salary','total_payments','total_mail','exercised_stock_options','total_mail_poi','ratio_from_poi','total_ratio_mail_poi']
 
+
+
+print ""
+print "-------------------------"
+print "Final Features selection : "
+print "-------------------------"
+print ""
+
+
 pp.pprint(features_list)
+
+print "-------------------------"
+print "removed : "
+print "\t'email_address' => ID information"
+print "added : "
+print "\t'ratio_to_poi'\t\t => Ratio sent mail total and sent mail to POI"
+print "\t'ratio_from_poi'\t => received mail total and received mail to POI"
+print "\t'total_mail'\t\t => Total mail : sent + received"
+print "\t'total_mail_poi'\t => total mail related to POI : sent + received to/from POI"
+print "\t'total_ratio_mail_poi'\t => Ratio total mail and total mail related to POI"
+print "-------------------------"
+print ""
+
+
 
 
 ###feature_list = ["poi", "salary", "bonus"] 
@@ -718,11 +843,18 @@ data_array = featureFormat(data_dict, features_list)
 labels, features = targetFeatureSplit(data_array)
 
 
+
+print ""
+print "SelectKBest method to highlight the best features to use"
+print ""
+
+
 ###SelectKbest
 ###output nicely
 ###https://stackoverflow.com/questions/41897020/sklearn-selectkbest-how-to-create-a-dict-of-feature1score-feature2score
 from sklearn.feature_selection import SelectKBest, f_classif
-selector = SelectKBest(f_classif, k ='all')
+
+selector = SelectKBest(f_classif)
 selector.fit(features, labels)
 #pp.pprint(zip(features_list, selector.scores_))
 combined = zip(features_list, selector.scores_)
@@ -731,6 +863,8 @@ combined.sort(reverse=True, key= lambda x: x[1])
 kbest_df = pd.DataFrame(combined)
 
 pp.pprint(kbest_df)
+
+
 ###
 ###SelectKbest results 
 ###
@@ -765,7 +899,27 @@ pp.pprint(kbest_df)
 ###My final list of features will be :
 ###
 
-features_list = ['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
+print ""
+print "My features list will be :"
+print ""
+
+#features_list = ['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
+
+#features_list = ['poi','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
+
+features_list = ['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','from_this_person_to_poi','salary','restricted_stock_deferred','shared_receipt_with_poi','deferral_payments','ratio_from_poi','total_stock_value','exercised_stock_options','ratio_to_poi']
+
+'''
+KNeighborsClassifier
+features_list = ['poi','bonus','director_fees','restricted_stock','from_poi_to_this_person','from_this_person_to_poi','salary','restricted_stock_deferred','shared_receipt_with_poi','deferral_payments','ratio_from_poi','total_stock_value','exercised_stock_options','ratio_to_poi']
+'''
+
+
+#['poi','deferral_payments','expenses','deferred_income','restricted_stock_deferred','shared_receipt_with_poi','from_messages','other','director_fees','bonus','total_stock_value','from_poi_to_this_person','ratio_to_poi','from_this_person_to_poi','restricted_stock','salary','total_mail','exercised_stock_options','total_mail_poi','ratio_from_poi','total_ratio_mail_poi']
+
+#['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
+
+#['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred','shared_receipt_with_poi','deferral_payments','ratio_from_poi','total_stock_value','exercised_stock_options','from_messages','total_mail_poi','ratio_to_poi','other']
 
 pp.pprint(features_list)
 
@@ -773,11 +927,24 @@ pp.pprint(features_list)
 
 
 #####################################################################################################
+###First
+###https://scikit-learn.org/stable/tutorial/machine_learning_map/index.html
+###This will help me to determine which classifier I'll choose to test
+###According to the diagram
+###>50
+###Predicting a category Yes
+###Labeled Data Yes
+###<100K Yes
+###LinearSVC
+###Text data NO
+###KNeighborsClassifier
+###
+###GaussianNB
 
 
-### Task 2: Remove outliers
-### Task 3: Create new feature(s)
-### Store to my_dataset for easy export below.
+### Task 2: Remove outliers DONE
+### Task 3: Create new feature(s) DONE
+### Store to my_dataset for easy export below. 
 my_dataset = data_dict
 
 ### Extract features and labels from dataset for local testing
@@ -794,21 +961,10 @@ labels, features = targetFeatureSplit(data)
 from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 
+from sklearn.neighbors import KNeighborsClassifier
+clf = KNeighborsClassifier(n_neighbors=5, weights='uniform', leaf_size=1, algorithm='auto', p=1)
 
-
-# run_clf(clf, features_train, features_test, labels_train, labels_test):
-# ''' takes a classifier and training and test data
-# prints performance time and metrics'''
-# t0 = time()
-# clf.fit(features_train, labels_train)
-# print "training time:", round(time()-t0, 3), "s"
-# t0 = time()
-# labels_prediction = clf.predict(features_test)
-# print "prediction time:", round(time()-t0, 3), "s"
-# report = classification_report(labels_test, labels_prediction)
-# print report
-
-
+test_classifier(clf,my_dataset,features_list)
 
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
@@ -819,13 +975,48 @@ clf = GaussianNB()
 
 # Example starting point. Try investigating other evaluation techniques!
 from sklearn.cross_validation import train_test_split
-features_train, features_test, labels_train, labels_test = \
-    train_test_split(features, labels, test_size=0.3, random_state=42)
+features_train, features_test, labels_train, labels_test = train_test_split(features, labels, test_size=0.3, random_state=42)
 
 ### Task 6: Dump your classifier, dataset, and features_list so anyone can
 ### check your results. You do not need to change anything below, but make sure
 ### that the version of poi_id.py that you submit can be run on its own and
 ### generates the necessary .pkl files for validating your results.
+'''
+print "dataset"
+print "features.shape:\t", features.shape
+print "labels.shape:\t", labels.shape
+
+print "dataset split train/test"
+print "features.shape:\t", features.shape
+print "labels.shape:\t", labels.shape
+
+features_train, features_test, labels_train, labels_test
+
+
+clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
+clf.score(X_test, y_test)
+'''
+
+
+
+'''
+gnb = GaussianNB()
+kneighbour = KNeighborsClassifier(n_neighbors=5, weights='uniform', leaf_size=1, algorithm='auto', p=1)
+'''
+
+'''
+    total_predictions = np.sum([true_negatives, false_negatives,
+                                false_positives, true_positives])
+    accuracy = 1.0*(true_positives + true_negatives)/total_predictions
+    precision = 1.0*true_positives/(true_positives+false_positives)
+    recall = 1.0*true_positives/(true_positives+false_negatives)
+    f1 = 2.0 * true_positives/(2*true_positives +
+                               false_positives+false_negatives)
+    f2 = (1+2.0*2.0) * precision*recall/(4*precision + recall)
+    return total_predictions, accuracy, precision, recall,\
+        true_positives, false_positives, true_negatives, \
+        false_negatives, f1, f2
+'''
 
 dump_classifier_and_data(clf, my_dataset, features_list)
 
