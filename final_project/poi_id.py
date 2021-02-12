@@ -16,8 +16,9 @@ import seaborn as sns
 import pandas as pd
 import numpy as np
 import pprint
+import time
 
-pp = pprint.PrettyPrinter(depth=4)
+pp = pprint.PrettyPrinter(depth=10)
 
 ###First launch bug !
 '''First launch
@@ -808,7 +809,8 @@ plt.show()
 
 features_list = ['poi','to_messages','deferral_payments','expenses','deferred_income','long_term_incentive','restricted_stock_deferred','shared_receipt_with_poi','loan_advances','from_messages','other','director_fees','bonus','total_stock_value','from_poi_to_this_person','ratio_to_poi','from_this_person_to_poi','restricted_stock','salary','total_payments','total_mail','exercised_stock_options','total_mail_poi','ratio_from_poi','total_ratio_mail_poi']
 
-
+###ff is the list features_list without poi
+ff = ['to_messages','deferral_payments','expenses','deferred_income','long_term_incentive','restricted_stock_deferred','shared_receipt_with_poi','loan_advances','from_messages','other','director_fees','bonus','total_stock_value','from_poi_to_this_person','ratio_to_poi','from_this_person_to_poi','restricted_stock','salary','total_payments','total_mail','exercised_stock_options','total_mail_poi','ratio_from_poi','total_ratio_mail_poi']
 
 print ""
 print "-------------------------"
@@ -818,6 +820,7 @@ print ""
 
 
 pp.pprint(features_list)
+pp.pprint(len(features_list))
 
 print "-------------------------"
 print "removed : "
@@ -834,15 +837,14 @@ print ""
 
 
 
-###feature_list = ["poi", "salary", "bonus"] 
-###data_array = featureFormat( data_dictionary, feature_list )
+###features_list = ["poi", "salary", "bonus"] 
+###data_array = featureFormat( data_dictionary, features_list )
 ###label, features = targetFeatureSplit(data_array)
 ### these two lines extract the features specified in features_list
 ### and extract them from data_dict, returning a numpy array
 data_array = featureFormat(data_dict, features_list)
 labels, features = targetFeatureSplit(data_array)
-
-
+print "length of features after processing"
 
 print ""
 print "SelectKBest method to highlight the best features to use"
@@ -856,17 +858,13 @@ from sklearn.feature_selection import SelectKBest, f_classif
 
 selector = SelectKBest(f_classif)
 selector.fit(features, labels)
-#pp.pprint(zip(features_list, selector.scores_))
-combined = zip(features_list, selector.scores_)
+combined = zip(ff, selector.scores_)
 combined.sort(reverse=True, key= lambda x: x[1])
-
 kbest_df = pd.DataFrame(combined)
-
 pp.pprint(kbest_df)
 
-
+'''###BAD SelectKbest results !?? Yes columns names included POI and shifted everything...
 ###
-###SelectKbest results 
 ###
 #                            0          1
 # 0                  total_mail  25.097542
@@ -893,6 +891,35 @@ pp.pprint(kbest_df)
 # 21        long_term_incentive   0.245090
 # 22                to_messages   0.225355
 # 23              loan_advances   0.164164
+'''
+
+###GOOD results !!!!!
+###My table has shifted because I let 'POI' in the features list to display !
+# 0     exercised_stock_options  24.815080
+# 1           total_stock_value  24.179972
+# 2                       bonus  20.792252
+# 3                      salary  18.289684
+# 4                ratio_to_poi  16.409713
+# 5             deferred_income  11.458477
+# 6         long_term_incentive   9.922186
+# 7            restricted_stock   8.828679
+# 8              total_payments   8.772778
+# 9     shared_receipt_with_poi   8.589421
+# 10              loan_advances   7.184056
+# 11                   expenses   6.094173
+# 12       total_ratio_mail_poi   5.399370
+# 13    from_poi_to_this_person   5.243450
+# 14             total_mail_poi   4.863682
+# 15                      other   4.187478
+# 16             ratio_from_poi   3.128092
+# 17    from_this_person_to_poi   2.382612
+# 18              director_fees   2.126328
+# 19                to_messages   1.646341
+# 20                 total_mail   0.490666
+# 21  restricted_stock_deferred   0.247053
+# 22          deferral_payments   0.233091
+# 23              from_messages   0.169701
+
 
 
 ###
@@ -903,27 +930,18 @@ print ""
 print "My features list will be :"
 print ""
 
-#features_list = ['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
+###Bad features selection !
+#features_list =  ['poi', 'total_mail', 'bonus', 'director_fees', 'restricted_stock', 'from_poi_to_this_person', 'expenses', 'deferred_income', 'from_this_person_to_poi', 'salary', 'restricted_stock_deferred']
 
-#features_list = ['poi','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
+###Good feature selection !!!!!!!!!!!
+features_list = ['poi', 'exercised_stock_options', 'total_stock_value', 'bonus', 'salary', 'ratio_to_poi', 'deferred_income', 'long_term_incentive','restricted_stock', 'total_payments', 'shared_receipt_with_poi', 'loan_advances', 'expenses', 'total_ratio_mail_poi', 'from_poi_to_this_person']
 
-features_list = ['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','from_this_person_to_poi','salary','restricted_stock_deferred','shared_receipt_with_poi','deferral_payments','ratio_from_poi','total_stock_value','exercised_stock_options','ratio_to_poi']
-
-'''
-KNeighborsClassifier
-features_list = ['poi','bonus','director_fees','restricted_stock','from_poi_to_this_person','from_this_person_to_poi','salary','restricted_stock_deferred','shared_receipt_with_poi','deferral_payments','ratio_from_poi','total_stock_value','exercised_stock_options','ratio_to_poi']
-'''
-
-
-#['poi','deferral_payments','expenses','deferred_income','restricted_stock_deferred','shared_receipt_with_poi','from_messages','other','director_fees','bonus','total_stock_value','from_poi_to_this_person','ratio_to_poi','from_this_person_to_poi','restricted_stock','salary','total_mail','exercised_stock_options','total_mail_poi','ratio_from_poi','total_ratio_mail_poi']
-
-#['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred']
-
-#['poi','total_mail','bonus','director_fees','restricted_stock','from_poi_to_this_person','expenses','deferred_income','from_this_person_to_poi','salary','restricted_stock_deferred','shared_receipt_with_poi','deferral_payments','ratio_from_poi','total_stock_value','exercised_stock_options','from_messages','total_mail_poi','ratio_to_poi','other']
 
 pp.pprint(features_list)
 
-
+print ""
+print "end of features list"
+print ""
 
 
 #####################################################################################################
@@ -938,6 +956,8 @@ pp.pprint(features_list)
 ###LinearSVC
 ###Text data NO
 ###KNeighborsClassifier
+###if not working : It is not working whithout tuning
+###adaboost
 ###
 ###GaussianNB
 
@@ -958,14 +978,36 @@ labels, features = targetFeatureSplit(data)
 ### http://scikit-learn.org/stable/modules/pipeline.html
 
 # Provided to give you a starting point. Try a variety of classifiers.
+
+##############################################################################################
 from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 
-from sklearn.neighbors import KNeighborsClassifier
-clf = KNeighborsClassifier(n_neighbors=5, weights='uniform', leaf_size=1, algorithm='auto', p=1)
+# from sklearn.neighbors import KNeighborsClassifier
+# clf = KNeighborsClassifier()
+
+
+# from sklearn.svm import LinearSVC
+# clf = LinearSVC()
+
+# from sklearn.tree import DecisionTreeClassifier
+# clf = DecisionTreeClassifier(criterion='entropy')
+
+# from sklearn.ensemble import AdaBoostClassifier
+# clf = AdaBoostClassifier()
+
+
+start = time.time()
+print "3 2 1... go !"
+print ""
 
 test_classifier(clf,my_dataset,features_list)
 
+end = time.time()
+print ""
+print end - start, " secs"
+
+##############################################################################################
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
 ### using our testing script. Check the tester.py script in the final project
 ### folder for details on the evaluation method, especially the test_classifier
@@ -981,44 +1023,19 @@ features_train, features_test, labels_train, labels_test = train_test_split(feat
 ### check your results. You do not need to change anything below, but make sure
 ### that the version of poi_id.py that you submit can be run on its own and
 ### generates the necessary .pkl files for validating your results.
-'''
-print "dataset"
-print "features.shape:\t", features.shape
-print "labels.shape:\t", labels.shape
 
-print "dataset split train/test"
-print "features.shape:\t", features.shape
-print "labels.shape:\t", labels.shape
-
-features_train, features_test, labels_train, labels_test
+#####################################################################################################
+###WARNING !
+###After a few manual tries, I was surprised about how bad were the results.
+###My first step was to edit the features list, keeping only what I feel and not what I calculate with selectKBest
+###It was so different I decided to check again the code !
+###WARNING !
 
 
-clf = svm.SVC(kernel='linear', C=1).fit(X_train, y_train)
-clf.score(X_test, y_test)
-'''
-
-
-
-'''
-gnb = GaussianNB()
-kneighbour = KNeighborsClassifier(n_neighbors=5, weights='uniform', leaf_size=1, algorithm='auto', p=1)
-'''
-
-'''
-    total_predictions = np.sum([true_negatives, false_negatives,
-                                false_positives, true_positives])
-    accuracy = 1.0*(true_positives + true_negatives)/total_predictions
-    precision = 1.0*true_positives/(true_positives+false_positives)
-    recall = 1.0*true_positives/(true_positives+false_negatives)
-    f1 = 2.0 * true_positives/(2*true_positives +
-                               false_positives+false_negatives)
-    f2 = (1+2.0*2.0) * precision*recall/(4*precision + recall)
-    return total_predictions, accuracy, precision, recall,\
-        true_positives, false_positives, true_negatives, \
-        false_negatives, f1, f2
-'''
 
 dump_classifier_and_data(clf, my_dataset, features_list)
+
+
 
 print "  "
 print " -----"
@@ -1026,3 +1043,84 @@ print "| END |"
 print " -----"
 print "  "
 
+
+
+###first results with bad features selection#########################################################
+
+# KNeighborsClassifier(algorithm='auto', leaf_size=30, metric='minkowski',metric_params=None, n_jobs=1, n_neighbors=5, p=2,weights='uniform')
+# Accuracy: 0.82657       Precision: 0.04852      Recall: 0.01150 F1: 0.01859     F2: 0.01357
+# Total predictions: 14000        True positives:   23    False positives:  451   False negatives: 1977   True negatives: 11549
+
+# GaussianNB(priors=None)
+# Accuracy: 0.34543       Precision: 0.17341      Recall: 0.95100 F1: 0.29334     F2: 0.50137
+# Total predictions: 14000        True positives: 1902    False positives: 9066   False negatives:   98   True negatives: 2934
+
+
+
+
+###first results with good features selection !########################################################
+
+# GaussianNB(priors=None)
+# Accuracy: 0.82193       Precision: 0.32480      Recall: 0.31100 F1: 0.31775     F2: 0.31367
+# Total predictions: 15000        True positives:  622    False positives: 1293   False negatives: 1378   True negatives: 11707
+
+# KNeighborsClassifier(algorithm='auto', leaf_size=30, metric='minkowski', metric_params=None, n_jobs=1, n_neighbors=5, p=2, weights='uniform')
+# Accuracy: 0.87640       Precision: 0.63878      Recall: 0.16800 F1: 0.26603     F2: 0.19704
+# Total predictions: 15000        True positives:  336    False positives:  190   False negatives: 1664   True negatives: 12810
+
+# LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,
+# intercept_scaling=1, loss='squared_hinge', max_iter=1000,
+# multi_class='ovr', penalty='l2', random_state=None, tol=0.0001,
+# verbose=0)
+# Accuracy: 0.68300       Precision: 0.13335      Recall: 0.25050 F1: 0.17405     F2: 0.21306
+# Total predictions: 15000        True positives:  501    False positives: 3256   False negatives: 1499   True negatives: 9744
+
+# LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,
+# intercept_scaling=1, loss='hinge', max_iter=1000, multi_class='ovr',
+# penalty='l2', random_state=None, tol=0.0001, verbose=0)
+# Accuracy: 0.69147       Precision: 0.13090      Recall: 0.23300 F1: 0.16763     F2: 0.20156
+# Total predictions: 15000        True positives:  466    False positives: 3094   False negatives: 1534   True negatives: 9906
+
+# LinearSVC(C=1.0, class_weight=None, dual=True, fit_intercept=True,intercept_scaling=1, loss='squared_hinge', max_iter=1000, multi_class='ovr', penalty='l2', random_state=None, tol=0.0001, verbose=0)
+# Accuracy: 0.69073       Precision: 0.13070      Recall: 0.23350 F1: 0.16759     F2: 0.20176
+# Total predictions: 15000        True positives:  467    False positives: 3106   False negatives: 1533   True negatives: 9894
+
+# DecisionTreeClassifier(class_weight=None, criterion='gini', max_depth=None, max_features=None, max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, min_samples_leaf=1, min_samples_split=2, min_weight_fraction_leaf=0.0, presort=False, random_state=None, splitter='best')
+# Accuracy: 0.81380       Precision: 0.29509      Recall: 0.28550 F1: 0.29022     F2: 0.28737
+# Total predictions: 15000        True positives:  571    False positives: 1364   False negatives: 1429   True negatives: 11636
+# 0.700000047684  secs
+
+# AdaBoostClassifier(algorithm='SAMME.R', base_estimator=None, learning_rate=1.0, n_estimators=50, random_state=None)
+# Accuracy: 0.83247       Precision: 0.34293      Recall: 0.28000 F1: 0.30829     F2: 0.29067
+# Total predictions: 15000        True positives:  560    False positives: 1073   False negatives: 1440   True negatives: 11927
+# 67.7769999504  secs
+
+
+# DecisionTreeClassifier(class_weight=None, criterion='entropy', max_depth=None, max_features=None, max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, min_samples_leaf=1, min_samples_split=2, min_weight_fraction_leaf=0.0, presort=False, random_state=None, splitter='best')
+# Accuracy: 0.82960       Precision: 0.34417      Recall: 0.30700 F1: 0.32452     F2: 0.31378
+# Total predictions: 15000        True positives:  614    False positives: 1170   False negatives: 1386   True negatives: 11830
+# 0.8109998703  secs
+
+
+
+
+
+
+
+
+
+
+
+# Precision is the number of correct positive classifications divided by the total number of positive labels assigned. In other words, it is the fraction of persons of interest predicted by the algorithm that are truly persons of interest. Mathematically precision is defined as
+
+# precision=true positives / (true positives+false positives)
+
+# Recall is the number of correct positive classifications divided by the number of positive instances that should have been identified. In other words, it is the fraction of the total number of persons of interestin the data that the classifier identifies. Mathematically, recall is defined as
+
+# recall=true positives / (true positives+false negatives)
+
+# Precision is also known as positive predictive value while recall is called the sensitivity of the classifier. A combined measured of precision and recall is the F1 score. Is it the harmonic mean of precision and recall. Mathematically, the F1 score is defined as:
+
+# F1 Score=2 (precision x recall) / (precision+recall)
+
+# For this project, the objective was a precision and a recall both greater than 0.3. However, I believe it is possible to do much better than that with the right feature selection and algorithm tuning. For the majority of my tuning and optimization using GridSearchCV, I will use the F1 score because it takes into account both the precision and recall.
