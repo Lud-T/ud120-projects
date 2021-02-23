@@ -205,8 +205,8 @@ for column in data_df.columns:
 ###Let's have a closer look to salary
 #sns.boxplot(data_df["salary"])
 #plt.show()
-
 '''
+
 
 ###Display boxplot and highest value and related name                ###
 print "-------------------"
@@ -299,64 +299,32 @@ print "Negatives values management DONE "
 print "------------------------------------------------------"
 print ""
 
-print "-----------"
-print "Drop outliers : "
-print "-----------"
 
-data_df = data_df.drop(['TOTAL'])
-data_dict.pop('TOTAL', 0)
-print "Drop 'TOTAL' : done"
+###enron exercise
+'''Before removing outliers
 
-data_df = data_df.drop(['THE TRAVEL AGENCY IN THE PARK'])
-data_dict.pop('THE TRAVEL AGENCY IN THE PARK', 0)
-print "Drop 'THE TRAVEL AGENCY IN THE PARK' : done"
+features_list = ["poi","salary", "bonus"]
+dataToDisplay = featureFormat(data_dict, features_list, sort_keys = True)
+poi=dataToDisplay[:,0]
+salary = dataToDisplay[:,1]
+bonus = dataToDisplay[:,2]
 
-print "-------------------"
-print "Check for the max value after drops : "
-print "-------------------"
+plt.scatter(salary[poi==1],bonus[poi==1],c='red',s=50,label='poi')
+plt.scatter(salary[poi==0],bonus[poi==0],c='blue',s=50,label='not poi')
 
-outlierMax = []
-for column in data_df.columns:
-    if (column != 'email_address'):
-        if (column != 'poi'):
-            #sns.boxplot(data=data_df[column], orient="h")
-            search = data_df[column] == data_df[column].max()
-            #plt.title(column + "  Max : " + str(data_df[column].max()) + "\nID : " + str(data_df[search].index.values) + "  POI : " + str(data_df.loc[data_df[search].index.values, 'poi'].values))
-            outlierMax.append([column,str(data_df[search].index.values), float(data_df[column].max()),str(data_df.loc[data_df[search].index.values, 'poi'].values)])
-            #plt.show()  
-
-outlierMax_df = pd.DataFrame(outlierMax,columns =['Variable','Name','Value Max','POI'])
-pp.pprint(outlierMax_df)
-
-
-
-print "   "
-print "I check everyone in the PDF"
-print "As the max values are correctly reported"
-print "I consider the ones below are not outliers"
-print "   "
-print "   "
-
-##########################################################
-### Testing purpose ONLY                               ###
-##########################################################
-###Visualize a boxplot for each column except email adress which is not a number to plot
+plt.xlabel("Salary")
+plt.ylabel("Bonus")
+plt.legend(loc='lower right')
+plt.title("Bonus vs Salary")
+plt.show()
 '''
-for column in data_df.columns:
-    if (column != 'email_address'):
-        sns.boxplot(data=data_df[column], orient="h")
-        plt.title("Boxplot : "+column)
-        plt.show()  
-'''
-# sns.boxplot(data=data_df['salary'], orient="h")
-# plt.title("Boxplot : "+"Salary"+" - Total")
-# plt.show()
+
 
 ###IQR testing on two variables
 ###I did not feel this approach fine with this small dataset.
 ###I understand IQR testing should be used to automatically remove outliers in large dataset.
 ###I ended using boxplot and check for each variable who is the most outlying.
-'''IQR testing
+###IQR testing
 print ""
 print "---------------"
 print "IQR salary "
@@ -395,11 +363,69 @@ print outliersToMessages.shape
 
 print ""
 print "---------------"
+
+
+
+print "-----------"
+print "Drop outliers : "
+print "-----------"
+
+data_df = data_df.drop(['TOTAL'])
+data_dict.pop('TOTAL', 0)
+print "Drop 'TOTAL' : done"
+
+data_df = data_df.drop(['THE TRAVEL AGENCY IN THE PARK'])
+data_dict.pop('THE TRAVEL AGENCY IN THE PARK', 0)
+print "Drop 'THE TRAVEL AGENCY IN THE PARK' : done"
+
+print "-------------------"
+print "Check for the max value after drops : "
+print "-------------------"
+
+
+
+outlierMax = []
+for column in data_df.columns:
+    if (column != 'email_address'):
+        if (column != 'poi'):
+            #sns.boxplot(data=data_df[column], orient="h")
+            search = data_df[column] == data_df[column].max()
+            #plt.title(column + "  Max : " + str(data_df[column].max()) + "\nID : " + str(data_df[search].index.values) + "  POI : " + str(data_df.loc[data_df[search].index.values, 'poi'].values))
+            outlierMax.append([column,str(data_df[search].index.values), float(data_df[column].max()),str(data_df.loc[data_df[search].index.values, 'poi'].values)])
+            #plt.show()  
+
+outlierMax_df = pd.DataFrame(outlierMax,columns =['Variable','Name','Value Max','POI'])
+pp.pprint(outlierMax_df)
+
+
+
+print "   "
+print "I check everyone in the PDF"
+print "As the max values are correctly reported"
+print "I consider the ones below are not outliers"
+print "   "
+print "   "
+
+##########################################################
+### Testing purpose ONLY                               ###
+##########################################################
+###Visualize a boxplot for each column except email adress which is not a number to plot
+'''
+for column in data_df.columns:
+    if (column != 'email_address'):
+        sns.boxplot(data=data_df[column], orient="h")
+        plt.title("Boxplot : "+column)
+        plt.show()  
+
+# sns.boxplot(data=data_df['salary'], orient="h")
+# plt.title("Boxplot : "+"Salary"+" - Total")
+# plt.show()
 '''
 
+
 ###enron exercise
-###Before removing outliers
-'''
+'''###after removing outliers
+
 features_list = ["poi","salary", "bonus"]
 dataToDisplay = featureFormat(data_dict, features_list, sort_keys = True)
 poi=dataToDisplay[:,0]
