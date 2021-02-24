@@ -1009,21 +1009,22 @@ labels, features = targetFeatureSplit(data)
 from sklearn.naive_bayes import GaussianNB
 clf = GaussianNB()
 
-# from sklearn.neighbors import KNeighborsClassifier
-# clf = KNeighborsClassifier()
+#from sklearn.neighbors import KNeighborsClassifier
+#clf = KNeighborsClassifier(n_neighbors=3, weights='uniform',leaf_size=5,algorithm='auto', p=1)
 
 
 # from sklearn.svm import LinearSVC
 # clf = LinearSVC()
 
-# from sklearn.tree import DecisionTreeClassifier
-# clf = DecisionTreeClassifier(criterion='entropy')
+#from sklearn.tree import DecisionTreeClassifier
+#clf = DecisionTreeClassifier(max_features='auto', splitter='best', criterion='entropy')
 
 # from sklearn.ensemble import AdaBoostClassifier
 # clf = AdaBoostClassifier()
 
 
 start = time.time()
+print "test_classifier"
 print "3 2 1... go !"
 print ""
 
@@ -1032,6 +1033,9 @@ test_classifier(clf,my_dataset,features_list)
 end = time.time()
 print ""
 print end - start, " secs"
+print ""
+print "...finish"
+print ""
 
 ##############################################################################################
 ### Task 5: Tune your classifier to achieve better than .3 precision and recall 
@@ -1040,6 +1044,50 @@ print end - start, " secs"
 ### function. Because of the small size of the dataset, the script uses
 ### stratified shuffle split cross validation. For more info: 
 ### http://scikit-learn.org/stable/modules/generated/sklearn.cross_validation.StratifiedShuffleSplit.html
+
+
+
+
+###Prints the best params for the classifier based on the results of the GridSearchCV
+'''GridSearchCV
+start = time.time()
+print ""
+print "GridSearchCV"
+print "3 2 1... go !"
+print ""
+
+
+from sklearn.model_selection import GridSearchCV
+classifier = KNeighborsClassifier()
+
+#https://scikit-learn.org/stable/modules/generated/sklearn.metrics.f1_score.html#sklearn.metrics.f1_score
+#As F1 is F1 = 2 * (precision * recall) / (precision + recall)
+#I think it is the best one to benchmark we are looking for precision and recall at least 0.3
+score_metric = 'f1'
+
+params = {'n_neighbors': range(1, 11),
+          'weights': ['uniform', 'distance'],
+          'algorithm': ['auto', 'ball_tree','kd_tree','brute'],
+          'leaf_size': range(5, 30),
+          'p': [1, 2]
+          }
+
+search = GridSearchCV(estimator=classifier, param_grid=params, scoring=score_metric, n_jobs=1, refit=True, cv=10)
+search.fit(features, labels)
+
+print "Best parameters: ", search.best_params_
+print "Best Score: ", score_metric, search.best_score_
+print "Number of tested models: %i" % np.prod([len(params[element]) for element in params])
+
+
+end = time.time()
+print ""
+print end - start, " secs"
+print ""
+print "...finish"
+'''
+
+
 
 # Example starting point. Try investigating other evaluation techniques!
 from sklearn.cross_validation import train_test_split
@@ -1068,6 +1116,100 @@ print " -----"
 print "| END |"
 print " -----"
 print "  "
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#Final results !!!
+
+# test_classifier
+# 3 2 1... go !
+
+# DecisionTreeClassifier(class_weight=None, criterion='entropy', max_depth=None,
+            # max_features='auto', max_leaf_nodes=None,
+            # min_impurity_decrease=0.0, min_impurity_split=None,
+            # min_samples_leaf=1, min_samples_split=2,
+            # min_weight_fraction_leaf=0.0, presort=False, random_state=None,
+            # splitter='best')
+        # Accuracy: 0.83553       Precision: 0.37107      Recall: 0.33600 F1: 0.35266     F2: 0.34247
+        # Total predictions: 15000        True positives:  672    False positives: 1139   False negatives: 1328   True negatives: 11861
+
+
+# 0.561000108719  secs
+
+# ...finish
+
+
+# GridSearchCV
+# 3 2 1... go !
+
+# C:\Anaconda3\envs\py2\lib\site-packages\sklearn\metrics\classification.py:1135: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  # 'precision', 'predicted', average, warn_for)
+# Best parameters:  {'max_features': 'sqrt', 'splitter': 'best', 'criterion': 'gini'}
+# Best Score:  f1 0.4638694638694638
+# Number of tested models: 12
+
+# 0.220999956131  secs
+
+# ...finish
+
+
+
+
+
+
+###final final result
+# test_classifier
+# 3 2 1... go !
+
+# KNeighborsClassifier(algorithm='auto', leaf_size=1, metric='minkowski',
+           # metric_params=None, n_jobs=1, n_neighbors=3, p=1,
+           # weights='uniform')
+        # Accuracy: 0.87880       Precision: 0.60156      Recall: 0.26950 F1: 0.37224     F2: 0.30295
+        # Total predictions: 15000        True positives:  539    False positives:  357   False negatives: 1461   True negatives: 12643
+
+
+# 1.12999987602  secs
+
+# ...finish
+
+
+# GridSearchCV
+# 3 2 1... go !
+
+# C:\Anaconda3\envs\py2\lib\site-packages\sklearn\metrics\classification.py:1135: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  # 'precision', 'predicted', average, warn_for)
+# Best parameters:  {'n_neighbors': 5, 'weights': 'uniform', 'leaf_size': 15, 'algorithm': 'auto'}
+# Best Score:  f1 0.18764568764568765
+# Number of tested models: 120
+
+# 4.25  secs
+
+# ...finish
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1122,6 +1264,8 @@ print "  "
 # 67.7769999504  secs
 
 
+
+
 # DecisionTreeClassifier(class_weight=None, criterion='entropy', max_depth=None, max_features=None, max_leaf_nodes=None, min_impurity_decrease=0.0, min_impurity_split=None, min_samples_leaf=1, min_samples_split=2, min_weight_fraction_leaf=0.0, presort=False, random_state=None, splitter='best')
 # Accuracy: 0.82960       Precision: 0.34417      Recall: 0.30700 F1: 0.32452     F2: 0.31378
 # Total predictions: 15000        True positives:  614    False positives: 1170   False negatives: 1386   True negatives: 11830
@@ -1130,23 +1274,71 @@ print "  "
 
 
 
+###after grid auto !!
+# test_classifier
+# 3 2 1... go !
+
+# DecisionTreeClassifier(class_weight=None, criterion='entropy', max_depth=None,
+            # max_features='auto', max_leaf_nodes=None,
+            # min_impurity_decrease=0.0, min_impurity_split=None,
+            # min_samples_leaf=1, min_samples_split=2,
+            # min_weight_fraction_leaf=0.0, presort=False, random_state=None,
+            # splitter='best')
+        # Accuracy: 0.82767       Precision: 0.33705      Recall: 0.30250 F1: 0.31884     F2: 0.30883
+        # Total predictions: 15000        True positives:  605    False positives: 1190   False negatives: 1395   True negatives: 11810
+
+
+# 0.559000015259  secs
+
+# ...finish
 
 
 
 
 
+###first grid test
+# test_classifier
+# 3 2 1... go !
+
+# KNeighborsClassifier(algorithm='auto', leaf_size=1, metric='minkowski',
+           # metric_params=None, n_jobs=1, n_neighbors=3, p=1,
+           # weights='uniform')
+        # Accuracy: 0.87880       Precision: 0.60156      Recall: 0.26950 F1: 0.37224     F2: 0.30295
+        # Total predictions: 15000        True positives:  539    False positives:  357   False negatives: 1461   True negatives: 12643
 
 
-# Precision is the number of correct positive classifications divided by the total number of positive labels assigned. In other words, it is the fraction of persons of interest predicted by the algorithm that are truly persons of interest. Mathematically precision is defined as
+# 1.13000011444  secs
 
-# precision=true positives / (true positives+false positives)
+# ...finish
+# GridSearchCV
+# 3 2 1... go !
 
-# Recall is the number of correct positive classifications divided by the number of positive instances that should have been identified. In other words, it is the fraction of the total number of persons of interestin the data that the classifier identifies. Mathematically, recall is defined as
+# C:\Anaconda3\envs\py2\lib\site-packages\sklearn\metrics\classification.py:1135: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  # 'precision', 'predicted', average, warn_for)
+# Best parameters:  {'n_neighbors': 3, 'weights': 'uniform', 'leaf_size': 1, 'algorithm': 'auto', 'p': 1}
+# Best Score:  f1 0.29160839160839164
+# Number of tested models: 1440
 
-# recall=true positives / (true positives+false negatives)
+# 53.0279998779  secs
 
-# Precision is also known as positive predictive value while recall is called the sensitivity of the classifier. A combined measured of precision and recall is the F1 score. Is it the harmonic mean of precision and recall. Mathematically, the F1 score is defined as:
+# ...finish
 
-# F1 Score=2 (precision x recall) / (precision+recall)
 
-# For this project, the objective was a precision and a recall both greater than 0.3. However, I believe it is possible to do much better than that with the right feature selection and algorithm tuning. For the majority of my tuning and optimization using GridSearchCV, I will use the F1 score because it takes into account both the precision and recall.
+
+
+
+# GridSearchCV
+# 3 2 1... go !
+
+# C:\Anaconda3\envs\py2\lib\site-packages\sklearn\metrics\classification.py:1135: UndefinedMetricWarning: F-score is ill-defined and being set to 0.0 due to no predicted samples.
+  # 'precision', 'predicted', average, warn_for)
+# Best parameters:  {'max_features': 'auto', 'splitter': 'best', 'criterion': 'entropy'}
+# Best Score:  f1 0.4673659673659673
+# Number of tested models: 12
+
+# 0.228000164032  secs
+
+# ...finish
+
+
+
