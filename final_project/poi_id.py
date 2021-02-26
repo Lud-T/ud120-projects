@@ -1048,7 +1048,7 @@ print ""
 
 
 
-###Prints the best params for the classifier based on the results of the GridSearchCV
+
 '''GridSearchCV
 start = time.time()
 print ""
@@ -1077,8 +1077,6 @@ search.fit(features, labels)
 
 print "Best parameters: ", search.best_params_
 print "Best Score: ", score_metric, search.best_score_
-print "Number of tested models: %i" % np.prod([len(params[element]) for element in params])
-
 
 end = time.time()
 print ""
@@ -1120,16 +1118,6 @@ print "  "
 
 
 
-
-
-
-
-
-
-
-
-
-
 #Final results !!!
 
 # test_classifier
@@ -1157,15 +1145,10 @@ print "  "
   # 'precision', 'predicted', average, warn_for)
 # Best parameters:  {'max_features': 'sqrt', 'splitter': 'best', 'criterion': 'gini'}
 # Best Score:  f1 0.4638694638694638
-# Number of tested models: 12
 
 # 0.220999956131  secs
 
 # ...finish
-
-
-
-
 
 
 ###final final result
@@ -1191,26 +1174,10 @@ print "  "
   # 'precision', 'predicted', average, warn_for)
 # Best parameters:  {'n_neighbors': 5, 'weights': 'uniform', 'leaf_size': 15, 'algorithm': 'auto'}
 # Best Score:  f1 0.18764568764568765
-# Number of tested models: 120
 
 # 4.25  secs
 
 # ...finish
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 ###first results with bad features selection#########################################################
@@ -1317,14 +1284,10 @@ print "  "
   # 'precision', 'predicted', average, warn_for)
 # Best parameters:  {'n_neighbors': 3, 'weights': 'uniform', 'leaf_size': 1, 'algorithm': 'auto', 'p': 1}
 # Best Score:  f1 0.29160839160839164
-# Number of tested models: 1440
 
 # 53.0279998779  secs
 
 # ...finish
-
-
-
 
 
 # GridSearchCV
@@ -1334,7 +1297,6 @@ print "  "
   # 'precision', 'predicted', average, warn_for)
 # Best parameters:  {'max_features': 'auto', 'splitter': 'best', 'criterion': 'entropy'}
 # Best Score:  f1 0.4673659673659673
-# Number of tested models: 12
 
 # 0.228000164032  secs
 
